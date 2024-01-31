@@ -2,7 +2,6 @@ package helloworld
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -31,9 +30,4 @@ func TestHelloWorld(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, response.Code)
 	assert.Equal(t, actualResponse.Message, expected)
-}
-
-func TestFailingTest(t *testing.T) {
-	fmt.Println("falied test")
-	t.Fail()
 }
