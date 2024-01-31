@@ -31,7 +31,3 @@ func TestHelloWorld(t *testing.T) {
 	assert.Equal(t, http.StatusOK, response.Code)
 	assert.Equal(t, actualResponse.Message, expected)
 }
-
-func TestFailingTest(t *testing.T) {
-	t.Fail()
-}
