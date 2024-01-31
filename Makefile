@@ -1,5 +1,3 @@
-
-
 PACKAGE_NAME = cmd
 
 BINARY_NAME = cmd
@@ -16,7 +14,7 @@ RUN_COMMAND = $(GO) run $(ENTRY_POINT)
 
 # Default target: build the project
 build:
-	go build -v ./cmd/main.go
+	go build ./cmd/main.go
 
 # Target: run the project
 run:
