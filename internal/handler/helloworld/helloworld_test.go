@@ -32,8 +32,3 @@ func TestHelloWorld(t *testing.T) {
 	assert.Equal(t, http.StatusOK, response.Code)
 	assert.Equal(t, actualResponse.Message, expected)
 }
-
-func TestFail(t *testing.T) {
-	fmt.Println("still trying sadly")
-	t.Fail()
-}
