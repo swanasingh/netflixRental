@@ -1,21 +1,36 @@
 package MovieService
 
 import (
-	"encoding/json"
-	"log"
-	"net/http"
 	"netflixRental/internal/models/movie"
+	"netflixRental/internal/repository/movie_repo"
 )
 
 type MovieService interface {
 	Get() []movie.Movie
+	FilterByCriteria(Genre, Actor string, Year int) []movie.Movie
+}
+
+func NewMovieService(movieRespository movie_repo.MovieRepository) MovieService {
+	return &movieService{movieRespository}
 }
 
 type movieService struct {
-	movie movie.Movie
+	movieRepo movie_repo.MovieRepository
 }
 
 func (m movieService) Get() []movie.Movie {
+	var movies []movie.Movie
+	movies = m.movieRepo.Get()
+	return movies
+}
+
+func (m movieService) FilterByCriteria(Genre, Actor string, Year int) []movie.Movie {
+	var movies []movie.Movie
+	movies = m.movieRepo.FetchByCriteria(Genre, Actor, Year)
+	return movies
+}
+
+/*func (m movieService) Get() []movie.Movie {
 	var movies movie.MovieResponse
 	resp, err := http.Get("http://www.omdbapi.com/?s=Barbie&type=movie&page=1&apikey=ead19c9f")
 	if err != nil {
@@ -28,9 +43,5 @@ func (m movieService) Get() []movie.Movie {
 			log.Fatal("cannot unmarshal the json response")
 		}
 	}
-	return movies.Search
-}
-
-func NewMovieService() MovieService {
-	return &movieService{}
-}
+	return movies.Movies
+}*/
