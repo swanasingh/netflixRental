@@ -15,16 +15,11 @@ import (
 
 func TestShouldReturnListOfMovie(t *testing.T) {
 
-	engine := gin.Default()
 	movieService := MovieService.NewMovieService()
 	handler := NewMovieHandler(movieService)
-	engine.GET("/netflix/api/movies", handler.ListMovies)
-	request, err := http.NewRequest(http.MethodGet, "/netflix/api/movies", nil)
-	require.NoError(t, err)
-	responseRecorder := httptest.NewRecorder()
-	engine.ServeHTTP(responseRecorder, request)
+	responseRecorder := getResponse(t, handler)
 	var response []movie2.Movie
-	err = json.NewDecoder(responseRecorder.Body).Decode(&response)
+	err := json.NewDecoder(responseRecorder.Body).Decode(&response)
 	require.NoError(t, err)
 
 	assert.Equal(t, responseRecorder.Code, http.StatusOK)
@@ -32,7 +27,6 @@ func TestShouldReturnListOfMovie(t *testing.T) {
 
 func TestShouldReturnListOfMovieWithMock(t *testing.T) {
 
-	engine := gin.Default()
 	movieService := mocks.MovieService{}
 	mockResponse := []movie2.Movie{{
 		Title:  "Barbie",
@@ -48,20 +42,25 @@ func TestShouldReturnListOfMovieWithMock(t *testing.T) {
 		Poster: "https://m.media-amazon.com/images/M/MV5BMGY5MzU3MzItNDBjMC00YjQzLWEzMTUtMGMxMTEzYjhkMGNkXkEyXkFqcGdeQXVyNDE5MTU2MDE@._V1_SX300.jpg",
 	},
 	}
-
-	handler := NewMovieHandler(&movieService)
-	engine.GET("/netflix/api/movies", handler.ListMovies)
-
 	movieService.On("Get").Return(mockResponse, nil)
-	request, err := http.NewRequest(http.MethodGet, "/netflix/api/movies", nil)
-	require.NoError(t, err)
-	responseRecorder := httptest.NewRecorder()
-	engine.ServeHTTP(responseRecorder, request)
+	handler := NewMovieHandler(&movieService)
+	responseRecorder := getResponse(t, handler)
 	var response []movie2.Movie
-	err = json.NewDecoder(responseRecorder.Body).Decode(&response)
+	err := json.NewDecoder(responseRecorder.Body).Decode(&response)
 	require.NoError(t, err)
 
 	assert.Equal(t, responseRecorder.Code, http.StatusOK)
 	assert.Equal(t, response, mockResponse)
 
+}
+
+func getResponse(t *testing.T, handler MovieHandler) *httptest.ResponseRecorder {
+
+	engine := gin.Default()
+	engine.GET("/netflix/api/movies", handler.ListMovies)
+	request, err := http.NewRequest(http.MethodGet, "/netflix/api/movies", nil)
+	require.NoError(t, err)
+	responseRecorder := httptest.NewRecorder()
+	engine.ServeHTTP(responseRecorder, request)
+	return responseRecorder
 }
