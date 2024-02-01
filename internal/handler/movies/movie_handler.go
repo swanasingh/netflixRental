@@ -1,7 +1,6 @@
 package movies
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"netflixRental/internal/service/MovieService"
@@ -29,7 +28,6 @@ func (m movie) SearchMovies(ctx *gin.Context) {
 	year, _ := ctx.GetQuery("year")
 	Year, _ := strconv.Atoi(year)
 
-	fmt.Println("handler params ", genre, actor, Year)
 	response := m.movieService.FilterByCriteria(genre, actor, Year)
 	ctx.AbortWithStatusJSON(http.StatusOK, response)
 }
