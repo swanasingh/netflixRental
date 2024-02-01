@@ -16,6 +16,8 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.17.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
+	github.com/golang-infrastructure/go-how-run v0.0.0-20230107060855-56163adc7748 // indirect
+	github.com/golang-infrastructure/go-project-root-directory v0.0.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
