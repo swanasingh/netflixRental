@@ -7,6 +7,7 @@ import (
 
 type MovieService interface {
 	Get(criteria movie.Criteria) []movie.Movie
+	GetMovieDetails(id int) movie.Movie
 }
 
 func NewMovieService(movieRespository movie_repo.MovieRepository) MovieService {
@@ -15,6 +16,10 @@ func NewMovieService(movieRespository movie_repo.MovieRepository) MovieService {
 
 type movieService struct {
 	movieRepo movie_repo.MovieRepository
+}
+
+func (m movieService) GetMovieDetails(id int) movie.Movie {
+	return m.movieRepo.GetMovieDetails(id)
 }
 
 func (m movieService) Get(criteria movie.Criteria) []movie.Movie {

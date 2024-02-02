@@ -91,6 +91,27 @@ func TestShouldReturnListOfMoviesFilteredByCriteria(t *testing.T) {
 	assert.Equal(t, mockResponse[0].Year, response[0].Year)
 
 }
+func TestShouldReturnMovieDetailsWhenCorrectIdGiven(t *testing.T) {
+
+	movieService := mocks.MovieService{}
+	mockResponse := movie2.Movie{
+		Id:     5,
+		Title:  "Barbie",
+		Year:   "2023",
+		ImdbId: "tt1517268",
+		Type:   "movie",
+		Poster: "https://m.media-amazon.com/images/M/MV5BNjU3N2QxNzYtMjk1NC00MTc4LTk1NTQtMmUxNTljM2I0NDA5XkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg",
+	}
+	movieService.On("GetMovieDetails", 5).Return(mockResponse, nil)
+	handler := NewMovieHandler(&movieService)
+	responseRecorder := getResponse(t, handler.GetMovieDetails, "/netflix/api/movies/:id", "/netflix/api/movies/5")
+	var response movie2.Movie
+	err := json.NewDecoder(responseRecorder.Body).Decode(&response)
+	require.NoError(t, err)
+	assert.Equal(t, responseRecorder.Code, http.StatusOK)
+	assert.Equal(t, response.Id, mockResponse.Id)
+	assert.Equal(t, response, mockResponse)
+}
 
 func getResponse(t *testing.T, handlerFunc gin.HandlerFunc, handlerUrl, url string) *httptest.ResponseRecorder {
 	engine := gin.Default()

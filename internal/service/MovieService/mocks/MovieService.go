@@ -33,6 +33,24 @@ func (_m *MovieService) Get(criteria movie.Criteria) []movie.Movie {
 	return r0
 }
 
+// GetMovieDetails provides a mock function with given fields: id
+func (_m *MovieService) GetMovieDetails(id int) movie.Movie {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetMovieDetails")
+	}
+
+	var r0 movie.Movie
+	if rf, ok := ret.Get(0).(func(int) movie.Movie); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(movie.Movie)
+	}
+
+	return r0
+}
+
 // NewMovieService creates a new instance of MovieService. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMovieService(t interface {

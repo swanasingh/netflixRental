@@ -11,10 +11,18 @@ import (
 
 type MovieHandler interface {
 	ListMovies(ctx *gin.Context)
+	GetMovieDetails(ctx *gin.Context)
 }
 
 type movie struct {
 	movieService MovieService.MovieService
+}
+
+func (m movie) GetMovieDetails(ctx *gin.Context) {
+	id := ctx.Param("id")
+	Id, _ := strconv.Atoi(id)
+	response := m.movieService.GetMovieDetails(Id)
+	ctx.JSON(http.StatusOK, response)
 }
 
 func (m movie) ListMovies(ctx *gin.Context) {
