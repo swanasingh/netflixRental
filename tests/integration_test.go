@@ -1,11 +1,14 @@
 package tests
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"net/http"
 	"net/http/httptest"
 	"netflixRental/configs"
@@ -90,4 +93,45 @@ func TestShouldNotReturnMovieByIdWhenIsIdIsIncorrect(t *testing.T) {
 
 	// Assert
 	assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
+}
+
+func TestPostgreSQLIntegration(t *testing.T) {
+	ctx := context.Background()
+
+	// Define a PostgreSQL container
+	req := testcontainers.ContainerRequest{
+		Image:        "postgres:latest",
+		ExposedPorts: []string{"5434/tcp"},
+		WaitingFor:   wait.ForLog("database system is ready to accept connections"),
+	}
+
+	// Create the container
+	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	if err != nil {
+		fmt.Println("container not created")
+		t.Fatal(err)
+	}
+	defer container.Terminate(ctx)
+
+	// Get the PostgreSQL port
+	host, _ := container.Host(ctx)
+	fmt.Println(host)
+	/*dsn := "user=postgres password=postgres dbname=postgres sslmode=disable host=" + host + " port=" + host
+
+	// Connect to the database
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	// Your database test code here
+
+	// Clean up
+	if err := container.Terminate(ctx); err != nil {
+		t.Fatal(err)
+	}*/
 }
