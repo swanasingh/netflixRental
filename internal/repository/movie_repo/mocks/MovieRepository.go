@@ -13,26 +13,6 @@ type MovieRepository struct {
 	mock.Mock
 }
 
-// FetchByCriteria provides a mock function with given fields: Genre, Actor, Year
-func (_m *MovieRepository) FetchByCriteria(Genre string, Actor string, Year int) []movie.Movie {
-	ret := _m.Called(Genre, Actor, Year)
-
-	if len(ret) == 0 {
-		panic("no return value specified for FetchByCriteria")
-	}
-
-	var r0 []movie.Movie
-	if rf, ok := ret.Get(0).(func(string, string, int) []movie.Movie); ok {
-		r0 = rf(Genre, Actor, Year)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]movie.Movie)
-		}
-	}
-
-	return r0
-}
-
 // Get provides a mock function with given fields: criteria
 func (_m *MovieRepository) Get(criteria movie.Criteria) []movie.Movie {
 	ret := _m.Called(criteria)

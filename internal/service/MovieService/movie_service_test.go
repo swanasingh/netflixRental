@@ -9,7 +9,7 @@ import (
 
 func TestMovieService(t *testing.T) {
 
-	/*t.Run("validate count of Movies", func(t *testing.T) {
+	t.Run("validate count of Movies", func(t *testing.T) {
 		m1 := movie.Movie{
 			1,
 			"TestTitle",
@@ -37,17 +37,19 @@ func TestMovieService(t *testing.T) {
 			"",
 			false,
 		}
+
 		var mockResponse []movie.Movie
 		mockResponse = append(mockResponse, m1)
 
 		mockRepository := mocks.MovieRepository{}
-		mockRepository.On("Get").Return(mockResponse)
+		mockRepository.On("Get", movie.Criteria{}).Return(mockResponse)
 		movieService := NewMovieService(&mockRepository)
 
-		got := movieService.Get()
+		got := movieService.Get(movie.Criteria{})
 		assert.Equal(t, len(got), 1)
 		assert.Equal(t, mockResponse, got)
-	})*/
+	})
+
 	t.Run("validate filter by criteria", func(t *testing.T) {
 		m1 := movie.Movie{
 			1,
@@ -80,10 +82,11 @@ func TestMovieService(t *testing.T) {
 		mockResponse = append(mockResponse, m1)
 
 		mockRepository := mocks.MovieRepository{}
-		mockRepository.On("FetchByCriteria", "Animation", "Kelly Sheridan", 2003).Return(mockResponse)
+		criteria := movie.Criteria{Actors: "Animation", Genre: "Kelly Sheridan", Year: 2003}
+		mockRepository.On("Get", criteria).Return(mockResponse)
 		movieService := NewMovieService(&mockRepository)
 
-		got := movieService.FilterByCriteria("Animation", "Kelly Sheridan", 2003)
+		got := movieService.Get(criteria)
 
 		assert.Equal(t, mockResponse[0].Year, got[0].Year)
 		assert.Equal(t, mockResponse[0].Genre, got[0].Genre)

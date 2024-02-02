@@ -2,8 +2,6 @@ package movies
 
 import (
 	"encoding/json"
-	//"encoding/json"
-	//"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -45,9 +43,13 @@ func TestShouldReturnListOfMovieWithMock(t *testing.T) {
 		false,
 	},
 	}
-	movieService.On("Get").Return(mockResponse)
+	movieService.On(
+		"Get",
+		movie2.Criteria{},
+	).Return(mockResponse)
+
 	handler := NewMovieHandler(&movieService)
-	responseRecorder := getResponse(t, handler.ListMovies, "/netflix/api/movies/", "/netflix/api/movies/")
+	responseRecorder := getResponse(t, handler.ListMovies, "/netflix/api/movies", "/netflix/api/movies")
 	var response []movie2.Movie
 	err := json.NewDecoder(responseRecorder.Body).Decode(&response)
 	require.NoError(t, err)
@@ -74,9 +76,11 @@ func TestShouldReturnListOfMoviesFilteredByCriteria(t *testing.T) {
 		Poster: "https://m.media-amazon.com/images/M/MV5BMGY5MzU3MzItNDBjMC00YjQzLWEzMTUtMGMxMTEzYjhkMGNkXkEyXkFqcGdeQXVyNDE5MTU2MDE@._V1_SX300.jpg",
 	},
 	}
-	movieService.On("FilterByCriteria", "", "", 2023).Return(mockResponse, nil)
+
+	criteria := movie2.Criteria{Actors: "Kelly Sheridan", Genre: "Animation", Year: 2023}
+	movieService.On("Get", criteria).Return(mockResponse, nil)
 	handler := NewMovieHandler(&movieService)
-	responseRecorder := getResponse(t, handler.SearchMovies, "/netflix/api/movies/search", "/netflix/api/movies/search?year=2023")
+	responseRecorder := getResponse(t, handler.ListMovies, "/netflix/api/movies", "/netflix/api/movies?actor=Kelly Sheridan&genre=Animation&year=2023")
 	var response []movie2.Movie
 
 	err := json.NewDecoder(responseRecorder.Body).Decode(&response)
