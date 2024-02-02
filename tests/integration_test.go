@@ -41,5 +41,5 @@ func TestGetAllMoviesWhenMoviesPresentInDB(t *testing.T) {
 	// Assert
 	fmt.Println(response)
 	assert.Equal(t, responseRecorder.Code, http.StatusOK)
-	assert.Equal(t, 5, len(response))
+	assert.Equal(t, 7, len(response))
 }
