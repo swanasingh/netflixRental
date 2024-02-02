@@ -43,3 +43,51 @@ func TestGetAllMoviesWhenMoviesPresentInDB(t *testing.T) {
 	assert.Equal(t, responseRecorder.Code, http.StatusOK)
 	assert.Equal(t, 7, len(response))
 }
+
+func TestGetMovieByIdWhenIsIdIsCorrect(t *testing.T) {
+	//Arrange
+	engine := gin.Default()
+	var config = configs.Config{}
+	dbConnect := db.CreateConnection(config)
+	movieRepository := movie_repo.NewMovieRepository(dbConnect)
+	movieService := MovieService.NewMovieService(movieRepository)
+	var movieHandler movies.MovieHandler
+	movieHandler = movies.NewMovieHandler(movieService)
+
+	//Act
+	engine.GET("/netflix/api/movies/:id", movieHandler.GetMovieDetails)
+	request, err := http.NewRequest(http.MethodGet, "/netflix/api/movies/1", nil)
+	require.NoError(t, err)
+	responseRecorder := httptest.NewRecorder()
+	engine.ServeHTTP(responseRecorder, request)
+	var response movie2.Movie
+
+	err = json.NewDecoder(responseRecorder.Body).Decode(&response)
+	require.NoError(t, err)
+
+	// Assert
+	fmt.Println(response)
+	assert.Equal(t, http.StatusOK, responseRecorder.Code)
+	assert.Equal(t, 1, response.Id)
+}
+
+func TestShouldNotReturnMovieByIdWhenIsIdIsIncorrect(t *testing.T) {
+	//Arrange
+	engine := gin.Default()
+	var config = configs.Config{}
+	dbConnect := db.CreateConnection(config)
+	movieRepository := movie_repo.NewMovieRepository(dbConnect)
+	movieService := MovieService.NewMovieService(movieRepository)
+	var movieHandler movies.MovieHandler
+	movieHandler = movies.NewMovieHandler(movieService)
+
+	//Act
+	engine.GET("/netflix/api/movies/:id", movieHandler.GetMovieDetails)
+	request, _ := http.NewRequest(http.MethodGet, "/netflix/api/movies/11", nil)
+
+	responseRecorder := httptest.NewRecorder()
+	engine.ServeHTTP(responseRecorder, request)
+
+	// Assert
+	assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
+}

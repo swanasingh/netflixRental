@@ -2,6 +2,7 @@ package movies
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -111,6 +112,17 @@ func TestShouldReturnMovieDetailsWhenCorrectIdGiven(t *testing.T) {
 	assert.Equal(t, responseRecorder.Code, http.StatusOK)
 	assert.Equal(t, response.Id, mockResponse.Id)
 	assert.Equal(t, response, mockResponse)
+}
+
+func TestShouldReturnEmptyMovieDetailsWhenIncorrectIdGiven(t *testing.T) {
+
+	movieService := mocks.MovieService{}
+
+	movieService.On("GetMovieDetails", 9).Return(movie2.Movie{}, errors.New("Invalid Id"))
+	handler := NewMovieHandler(&movieService)
+	responseRecorder := getResponse(t, handler.GetMovieDetails, "/netflix/api/movies/:id", "/netflix/api/movies/9")
+
+	assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
 }
 
 func getResponse(t *testing.T, handlerFunc gin.HandlerFunc, handlerUrl, url string) *httptest.ResponseRecorder {

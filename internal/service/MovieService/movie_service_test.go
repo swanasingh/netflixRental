@@ -1,6 +1,7 @@
 package MovieService
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"netflixRental/internal/models/movie"
 	"netflixRental/internal/repository/movie_repo/mocks"
@@ -68,13 +69,25 @@ func TestMovieService(t *testing.T) {
 	t.Run("get movie details if correct id is given", func(t *testing.T) {
 
 		mockRepository := mocks.MovieRepository{}
-		mockRepository.On("GetMovieDetails", 1).Return(m1)
+		mockRepository.On("GetMovieDetails", 1).Return(m1, nil)
 		movieService := NewMovieService(&mockRepository)
 
-		got := movieService.GetMovieDetails(1)
+		got, _ := movieService.GetMovieDetails(1)
 
 		assert.Equal(t, m1.Id, got.Id)
 		assert.Equal(t, m1.Title, got.Title)
+	})
+
+	t.Run("should return empty movie details if incorrect id is given", func(t *testing.T) {
+
+		mockRepository := mocks.MovieRepository{}
+		mockRepository.On("GetMovieDetails", 9).Return(movie.Movie{}, errors.New("Invalid Id"))
+		movieService := NewMovieService(&mockRepository)
+
+		_, err := movieService.GetMovieDetails(9)
+
+		assert.Equal(t, "Invalid Id", err.Error())
+
 	})
 
 }

@@ -21,7 +21,12 @@ type movie struct {
 func (m movie) GetMovieDetails(ctx *gin.Context) {
 	id := ctx.Param("id")
 	Id, _ := strconv.Atoi(id)
-	response := m.movieService.GetMovieDetails(Id)
+	response, err := m.movieService.GetMovieDetails(Id)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
 	ctx.JSON(http.StatusOK, response)
 }
 

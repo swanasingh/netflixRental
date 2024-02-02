@@ -22,6 +22,6 @@ func RegisterRoutes(engine *gin.Engine) {
 	{
 		group.GET("/hello", helloworld.HelloWorld)
 		group.GET("/movies", movieHandler.ListMovies)
-		//group.GET("/movies/search", movieHandler.SearchMovies)
+		group.GET("/movies/:id", movieHandler.GetMovieDetails)
 	}
 }

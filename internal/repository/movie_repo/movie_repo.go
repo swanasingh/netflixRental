@@ -2,6 +2,7 @@ package movie_repo
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"netflixRental/internal/models/movie"
@@ -10,25 +11,32 @@ import (
 
 type MovieRepository interface {
 	Get(criteria movie.Criteria) []movie.Movie
-	GetMovieDetails(id int) movie.Movie
+	GetMovieDetails(id int) (movie.Movie, error)
 }
 
 type movieRepo struct {
 	*sql.DB
 }
 
-func (m movieRepo) GetMovieDetails(id int) movie.Movie {
+func (m movieRepo) GetMovieDetails(id int) (movie.Movie, error) {
 	var mv movie.Movie
 	query := fmt.Sprintf("select * from movies where id =%d", id)
 	row := m.DB.QueryRow(query)
-	row.Scan(&mv.Id, &mv.Title,
+
+	err := row.Scan(&mv.Id, &mv.Title,
 		&mv.Year, &mv.Rated, &mv.Released,
 		&mv.Runtime, &mv.Genre, &mv.Director,
 		&mv.Writer, &mv.Actors, &mv.Plot, &mv.Language,
 		&mv.Country, &mv.Awards, &mv.Poster, &mv.Metascore,
 		&mv.ImdbRating, &mv.ImdbVotes, &mv.ImdbId, &mv.Type, &mv.Dvd, &mv.BoxOffice,
 		&mv.Production, &mv.Website, &mv.Response)
-	return mv
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return mv, errors.New("Invalid Id")
+		}
+	}
+	return mv, nil
 }
 
 func NewMovieRepository(db *sql.DB) MovieRepository {
