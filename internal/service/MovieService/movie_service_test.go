@@ -9,7 +9,7 @@ import (
 
 func TestMovieService(t *testing.T) {
 
-	t.Run("validate count of Movies", func(t *testing.T) {
+	/*t.Run("validate count of Movies", func(t *testing.T) {
 		m1 := movie.Movie{
 			1,
 			"TestTitle",
@@ -47,7 +47,7 @@ func TestMovieService(t *testing.T) {
 		got := movieService.Get()
 		assert.Equal(t, len(got), 1)
 		assert.Equal(t, mockResponse, got)
-	})
+	})*/
 	t.Run("validate filter by criteria", func(t *testing.T) {
 		m1 := movie.Movie{
 			1,

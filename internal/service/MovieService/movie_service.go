@@ -6,7 +6,7 @@ import (
 )
 
 type MovieService interface {
-	Get() []movie.Movie
+	Get(criteria movie.Criteria) []movie.Movie
 	FilterByCriteria(Genre, Actor string, Year int) []movie.Movie
 }
 
@@ -18,9 +18,9 @@ type movieService struct {
 	movieRepo movie_repo.MovieRepository
 }
 
-func (m movieService) Get() []movie.Movie {
+func (m movieService) Get(criteria movie.Criteria) []movie.Movie {
 	var movies []movie.Movie
-	movies = m.movieRepo.Get()
+	movies = m.movieRepo.Get(criteria)
 	return movies
 }
 

@@ -3,6 +3,7 @@ package movies
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	movie2 "netflixRental/internal/models/movie"
 	"netflixRental/internal/service/MovieService"
 	"strconv"
 )
@@ -18,8 +19,15 @@ type movie struct {
 
 func (m movie) ListMovies(ctx *gin.Context) {
 
-	response := m.movieService.Get()
-	ctx.AbortWithStatusJSON(http.StatusOK, response)
+	genre, ok1 := ctx.GetQuery("genre")
+	actor, ok2 := ctx.GetQuery("actor")
+	year, ok3 := ctx.GetQuery("year")
+	var criteria movie2.Criteria
+	if ok1 || ok2 || ok3 {
+		criteria = movie2.Criteria{genre, actor, year}
+	}
+	response := m.movieService.Get(criteria)
+	ctx.JSON(http.StatusOK, response)
 }
 
 func (m movie) SearchMovies(ctx *gin.Context) {
@@ -29,7 +37,7 @@ func (m movie) SearchMovies(ctx *gin.Context) {
 	Year, _ := strconv.Atoi(year)
 
 	response := m.movieService.FilterByCriteria(genre, actor, Year)
-	ctx.AbortWithStatusJSON(http.StatusOK, response)
+	ctx.JSON(http.StatusOK, response)
 }
 
 func NewMovieHandler(movieService MovieService.MovieService) MovieHandler {

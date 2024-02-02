@@ -33,17 +33,17 @@ func (_m *MovieService) FilterByCriteria(Genre string, Actor string, Year int) [
 	return r0
 }
 
-// Get provides a mock function with given fields:
-func (_m *MovieService) Get() []movie.Movie {
-	ret := _m.Called()
+// Get provides a mock function with given fields: criteria
+func (_m *MovieService) Get(criteria movie.Criteria) []movie.Movie {
+	ret := _m.Called(criteria)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Get")
 	}
 
 	var r0 []movie.Movie
-	if rf, ok := ret.Get(0).(func() []movie.Movie); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(movie.Criteria) []movie.Movie); ok {
+		r0 = rf(criteria)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]movie.Movie)
