@@ -12,10 +12,30 @@ import (
 type MovieHandler interface {
 	ListMovies(ctx *gin.Context)
 	GetMovieDetails(ctx *gin.Context)
+	AddToCart(ctx *gin.Context)
 }
 
 type movie struct {
 	movieService MovieService.MovieService
+}
+
+func (m movie) AddToCart(ctx *gin.Context) {
+	var cartData movie2.CartRequest
+	if err := ctx.BindJSON(&cartData); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if cartData.MovieId == 0 {
+		ctx.JSON(http.StatusBadRequest, "Provide valid movie_id")
+		return
+	}
+	if err := m.movieService.AddToCart(cartData.MovieId); err != nil {
+		ctx.JSON(http.StatusBadRequest, "Provide valid movie_id")
+		return
+	} else {
+		ctx.JSON(http.StatusCreated, nil)
+	}
+
 }
 
 func (m movie) GetMovieDetails(ctx *gin.Context) {

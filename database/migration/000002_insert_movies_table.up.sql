@@ -7,7 +7,7 @@ INSERT INTO Movies (
     'Greta Gerwig', 'Greta Gerwig, Noah Baumbach', 'Margot Robbie, Ryan Gosling, Issa Rae',
     'Barbie and Ken are having the time of their lives in the colorful and seemingly perfect world of Barbie Land. However, when they get a chance to go to the real world, they soon discover the joys and perils of living among humans.',
     'English, Spanish', 'United States, United Kingdom', 'Nominated for 5 BAFTA 114 wins & 337 nominations total',
-    'https://m.media-amazon.com/images/M/MV5BNjU3N2QxNzYtMjk1NC00MTc4LTk1NTQtMmUxNTljM2I0NDA5XkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg', 80, 6.9, 466959, 'tt1517268',
+    'https://m.media-amazon.com/images/M/MV5BNjU3N2QxNzYtMjk1NC00MTc4LTk1NTQtMmUxNTljM2I0NDA5XkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg', null, 6.9, 466959, 'tt1517268',
     'movie', '2023-09-12', '$636,236,401', 'N/A', 'N/A', true),
 
     ('Barbie as The Princess and the Pauper', 2004, 'Not Rated', '2004-09-28', 85, 'Animation, Comedy, Family, Musical',
@@ -22,7 +22,7 @@ INSERT INTO Movies (
     'Kelly Sheridan, Kirby Morrow, Tim Curry, Peter Kelamis',
     'Barbie (Kelly Sheridan) shows that if you are kind, clever and brave, anything is possible in this tale of Clara (Kelly Sheridan) and her amazing Nutcracker (Kirby Morrow), who set off on an adventure to find the Sugarplum Princess.',
     'English', 'USA', '1 win & 2 nominations.',
-    'https://m.media-amazon.com/images/M/MV5BMTk0Y2E2MjgtZDBhNi00OTQ3LTkyYzAtNTdmNzRhYTczZWI2XkEyXkFqcGdeQXVyNDE5MTU2MDE@._V1_SX300.jpg', 20, 6.3, 5551, 'tt0288441',
+    'https://m.media-amazon.com/images/M/MV5BMTk0Y2E2MjgtZDBhNi00OTQ3LTkyYzAtNTdmNzRhYTczZWI2XkEyXkFqcGdeQXVyNDE5MTU2MDE@._V1_SX300.jpg', null, 6.3, 5551, 'tt0288441',
     'movie', '2015-09-01', 'N/A', 'N/A', 'N/A', true),
 
     ('Barbie as Rapunzel', 2002, 'Unrated', '2002-10-01', 84, 'Animation, Family, Fantasy',
