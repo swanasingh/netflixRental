@@ -21,7 +21,8 @@ type movie struct {
 
 func (m movie) AddToCart(ctx *gin.Context) {
 	var cartData movie2.CartRequest
-	if err := ctx.BindJSON(&cartData); err != nil {
+	fmt.Println("I FOUND THE API")
+	if err := ctx.ShouldBindJSON(&cartData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -29,11 +30,12 @@ func (m movie) AddToCart(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, "Provide valid movie_id")
 		return
 	}
-	if err := m.movieService.AddToCart(cartData.MovieId); err != nil {
-		ctx.JSON(http.StatusBadRequest, "Provide valid movie_id")
+	cartItem := movie2.CartItem{MovieId: cartData.MovieId, UserId: cartData.UserId, Status: true}
+	if err := m.movieService.AddToCart(cartItem); err != nil {
+		ctx.JSON(http.StatusBadRequest, "This Movie Is Not Available")
 		return
 	} else {
-		ctx.JSON(http.StatusCreated, nil)
+		ctx.JSON(http.StatusCreated, cartItem)
 	}
 
 }

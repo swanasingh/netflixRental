@@ -61,6 +61,24 @@ func (_m *MovieRepository) GetMovieDetails(id int) (movie.Movie, error) {
 	return r0, r1
 }
 
+// SaveCartData provides a mock function with given fields: cartItem
+func (_m *MovieRepository) SaveCartData(cartItem movie.CartItem) error {
+	ret := _m.Called(cartItem)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveCartData")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(movie.CartItem) error); ok {
+		r0 = rf(cartItem)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewMovieRepository creates a new instance of MovieRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMovieRepository(t interface {

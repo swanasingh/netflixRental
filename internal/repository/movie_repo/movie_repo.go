@@ -12,18 +12,17 @@ import (
 type MovieRepository interface {
 	Get(criteria movie.Criteria) []movie.Movie
 	GetMovieDetails(id int) (movie.Movie, error)
-	SaveCartData(id int) error
+	SaveCartData(cartItem movie.CartItem) error
 }
 
 type movieRepo struct {
 	*sql.DB
 }
 
-func (m movieRepo) SaveCartData(id int) error {
+func (m movieRepo) SaveCartData(cartItem movie.CartItem) error {
 
-	_, err := m.DB.Exec("insert into cart (movie_id) values($1)", id)
+	_, err := m.DB.Exec("insert into cart (user_id,status,movie_id) values($1, $2, $3)", cartItem.UserId, true, cartItem.MovieId)
 	if err != nil {
-		log.Fatal("Unable to add to cart")
 		return errors.New("Movie is not present in database")
 	}
 

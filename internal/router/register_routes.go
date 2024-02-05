@@ -12,6 +12,7 @@ import (
 
 func RegisterRoutes(engine *gin.Engine) {
 	var config = configs.Config{}
+	db.RunMigration(config)
 	dbConnect := db.CreateConnection(config)
 	movieRepository := movie_repo.NewMovieRepository(dbConnect)
 	movieService := MovieService.NewMovieService(movieRepository)
@@ -25,4 +26,5 @@ func RegisterRoutes(engine *gin.Engine) {
 		group.GET("/movies/:id", movieHandler.GetMovieDetails)
 		group.POST("/movies/add_to_cart", movieHandler.AddToCart)
 	}
+
 }

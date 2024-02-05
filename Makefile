@@ -27,6 +27,9 @@ run:
 clean:
 	rm -f $(BINARY_FOLDER)/$(BINARY_NAME)
 
+migrate:
+	 migrate -path database/migration/ -database "postgresql://root:pass@localhost:5432/netflix-rental?sslmode=disable" -verbose up
+
 # Target: build and run the project
 all: build run
 

@@ -90,4 +90,27 @@ func TestMovieService(t *testing.T) {
 
 	})
 
+	t.Run("should add cartItems to cart", func(t *testing.T) {
+		mockRepository := mocks.MovieRepository{}
+		cartItem := movie.CartItem{MovieId: 1, UserId: 10}
+		mockRepository.On("SaveCartData", cartItem).Return(nil)
+		movieService := NewMovieService(&mockRepository)
+		err := movieService.AddToCart(cartItem)
+
+		assert.NoError(t, err)
+
+	})
+
+	t.Run("should not add invalid cartItems to cart", func(t *testing.T) {
+		expectedError := errors.New("Movie is not present in database")
+		mockRepository := mocks.MovieRepository{}
+		cartItem := movie.CartItem{MovieId: 10, UserId: 10}
+		mockRepository.On("SaveCartData", cartItem).Return(expectedError)
+		movieService := NewMovieService(&mockRepository)
+		err := movieService.AddToCart(cartItem)
+
+		assert.Equal(t, expectedError, err)
+
+	})
+
 }

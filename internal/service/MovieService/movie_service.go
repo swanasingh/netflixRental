@@ -8,7 +8,7 @@ import (
 type MovieService interface {
 	Get(criteria movie.Criteria) []movie.Movie
 	GetMovieDetails(id int) (movie.Movie, error)
-	AddToCart(id int) error
+	AddToCart(cartItem movie.CartItem) error
 }
 
 func NewMovieService(movieRespository movie_repo.MovieRepository) MovieService {
@@ -19,8 +19,8 @@ type movieService struct {
 	movieRepo movie_repo.MovieRepository
 }
 
-func (m movieService) AddToCart(id int) error {
-	return m.movieRepo.SaveCartData(id)
+func (m movieService) AddToCart(cartItem movie.CartItem) error {
+	return m.movieRepo.SaveCartData(cartItem)
 }
 
 func (m movieService) GetMovieDetails(id int) (movie.Movie, error) {

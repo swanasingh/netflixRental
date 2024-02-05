@@ -13,6 +13,23 @@ type MovieService struct {
 	mock.Mock
 }
 
+// AddToCart provides a mock function with given fields: cartItem
+func (_m *MovieService) AddToCart(cartItem movie.CartItem) error {
+	ret := _m.Called(cartItem)
+	if len(ret) == 0 {
+		panic("no return value specified for AddToCart")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(movie.CartItem) error); ok {
+		r0 = rf(cartItem)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Get provides a mock function with given fields: criteria
 func (_m *MovieService) Get(criteria movie.Criteria) []movie.Movie {
 	ret := _m.Called(criteria)
