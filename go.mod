@@ -32,6 +32,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-infrastructure/go-how-run v0.0.0-20230107060855-56163adc7748 // indirect
 	github.com/golang-infrastructure/go-project-root-directory v0.0.1 // indirect
+	github.com/golang-migrate/migrate v3.5.4+incompatible // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
@@ -56,6 +57,32 @@ func TestAllEndpoints(t *testing.T) {
 		// Assert
 		assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
 	})
+
+	t.Run("TestShouldAddToCartWhenCartItemIsValid", func(t *testing.T) {
+		cartRequest := movie2.CartRequest{MovieId: 1, UserId: 2}
+
+		jsonData, err := json.Marshal(cartRequest)
+		if err != nil {
+			fmt.Println("Error encoding JSON:", err)
+			return
+		}
+		responseRecorder := postResponse(t, movieHandler.AddToCart, "/netflix/api/movies/add_to_cart", "/netflix/api/movies/add_to_cart", jsonData)
+		// Assert
+		assert.Equal(t, http.StatusCreated, responseRecorder.Code)
+	})
+
+	t.Run("TestShouldNotAddToCartWhenCartItemIsInvalid", func(t *testing.T) {
+		cartRequest := movie2.CartRequest{MovieId: 11, UserId: 2}
+
+		jsonData, err := json.Marshal(cartRequest)
+		if err != nil {
+			fmt.Println("Error encoding JSON:", err)
+			return
+		}
+		responseRecorder := postResponse(t, movieHandler.AddToCart, "/netflix/api/movies/add_to_cart", "/netflix/api/movies/add_to_cart", jsonData)
+		// Assert
+		assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
+	})
 }
 
 func getResponse(t *testing.T, handlerFunc gin.HandlerFunc, handlerUrl, url string) *httptest.ResponseRecorder {
@@ -63,6 +90,17 @@ func getResponse(t *testing.T, handlerFunc gin.HandlerFunc, handlerUrl, url stri
 	engine := gin.Default()
 	engine.GET(handlerUrl, handlerFunc)
 	request, err := http.NewRequest(http.MethodGet, url, nil)
+	require.NoError(t, err)
+	responseRecorder := httptest.NewRecorder()
+	engine.ServeHTTP(responseRecorder, request)
+	return responseRecorder
+}
+
+func postResponse(t *testing.T, handlerFunc gin.HandlerFunc, handlerUrl, url string, body []byte) *httptest.ResponseRecorder {
+
+	engine := gin.Default()
+	engine.POST(handlerUrl, handlerFunc)
+	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
 	require.NoError(t, err)
 	responseRecorder := httptest.NewRecorder()
 	engine.ServeHTTP(responseRecorder, request)

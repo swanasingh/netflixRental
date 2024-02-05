@@ -3,9 +3,11 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"github.com/golang-migrate/migrate"
 	_ "github.com/lib/pq"
 	"log"
 	"netflixRental/configs"
+	"os"
 )
 
 func CreateConnection(cfg configs.Config) *sql.DB {
@@ -28,3 +30,27 @@ func CreateConnection(cfg configs.Config) *sql.DB {
 	}
 	return dbConn
 }
+
+func RunMigration(cfg configs.Config) {
+	// Initialize migration instance
+	source, _ := os.Getwd()
+	path := fmt.Sprintf("%s/database/migration", source)
+	fmt.Println(path)
+	m, err := migrate.New(
+		path,
+		"postgres://root:pass@localhost:5432/netflix-rental?sslmode=disable",
+	)
+	if err != nil {
+		fmt.Println(os.Getwd())
+		log.Fatalf("Error initializing migration: %v", err)
+	}
+
+	// Apply migrations
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatalf("Error applying migrations: %v", err)
+	}
+
+	log.Println("Migrations applied successfully")
+}
+
+//$ migrate -path database/migration/ -database "postgresql://username:secretkey@localhost:5432/database_name?sslmode=disable" -verbose up
