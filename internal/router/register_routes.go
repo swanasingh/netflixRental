@@ -1,20 +1,17 @@
 package router
 
 import (
+	"database/sql"
 	"github.com/gin-gonic/gin"
-	"netflixRental/configs"
-	"netflixRental/database/db"
 	"netflixRental/internal/handler/helloworld"
 	"netflixRental/internal/handler/movies"
 	"netflixRental/internal/repository/movie_repo"
 	"netflixRental/internal/service/MovieService"
 )
 
-func RegisterRoutes(engine *gin.Engine) {
-	var config = configs.Config{}
-	db.RunMigration(config)
-	dbConnect := db.CreateConnection(config)
-	movieRepository := movie_repo.NewMovieRepository(dbConnect)
+func RegisterRoutes(engine *gin.Engine, db *sql.DB) {
+
+	movieRepository := movie_repo.NewMovieRepository(db)
 	movieService := MovieService.NewMovieService(movieRepository)
 	var movieHandler movies.MovieHandler
 	movieHandler = movies.NewMovieHandler(movieService)

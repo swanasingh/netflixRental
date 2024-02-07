@@ -2,36 +2,47 @@ package tests
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"log"
 	"net/http"
 	"net/http/httptest"
-	"netflixRental/configs"
 	"netflixRental/database/db"
-	"netflixRental/internal/handler/movies"
 	movie2 "netflixRental/internal/models/movie"
-	"netflixRental/internal/repository/movie_repo"
-	"netflixRental/internal/service/MovieService"
+	"netflixRental/internal/router"
+	"os"
 	"testing"
 )
 
-func TestAllEndpoints(t *testing.T) {
-	//Arrange
-	var config = configs.Config{}
-	dbConnect := db.CreateConnection(config)
-	movieRepository := movie_repo.NewMovieRepository(dbConnect)
-	movieService := MovieService.NewMovieService(movieRepository)
-	var movieHandler movies.MovieHandler
-	movieHandler = movies.NewMovieHandler(movieService)
+var engine *gin.Engine
+
+func TestMain(m *testing.M) {
+	test_container, ctx, dbConnect, _ := CreatePostgresTestContainer()
+	db.RunMigration(dbConnect)
+	engine = gin.Default()
+	router.RegisterRoutes(engine, dbConnect)
+	code := m.Run()
+
+	if err := test_container.Terminate(ctx); err != nil {
+		log.Fatal(err)
+	}
+	os.Exit(code)
+}
+
+func TestListAllMovies(t *testing.T) {
 
 	t.Run("TestGetAllMoviesWhenMoviesPresentInDB", func(t *testing.T) {
-		//Act
-		responseRecorder := getResponse(t, movieHandler.ListMovies, "/netflix/api/movies", "/netflix/api/movies")
+
+		request, err := http.NewRequest(http.MethodGet, "/netflix/api/movies", nil)
+		require.NoError(t, err)
+		responseRecorder := httptest.NewRecorder()
+		engine.ServeHTTP(responseRecorder, request)
+
 		var response []movie2.Movie
-		err := json.NewDecoder(responseRecorder.Body).Decode(&response)
+		err = json.NewDecoder(responseRecorder.Body).Decode(&response)
 		require.NoError(t, err)
 
 		// Assert
@@ -40,20 +51,28 @@ func TestAllEndpoints(t *testing.T) {
 	})
 
 	t.Run("TestGetMovieByIdWhenIsIdIsCorrect", func(t *testing.T) {
-		responseRecorder := getResponse(t, movieHandler.GetMovieDetails, "/netflix/api/movies/:id", "/netflix/api/movies/1")
+
+		request, err := http.NewRequest(http.MethodGet, "/netflix/api/movies/1", nil)
+		require.NoError(t, err)
+		responseRecorder := httptest.NewRecorder()
+		engine.ServeHTTP(responseRecorder, request)
+
 		var response movie2.Movie
-		err := json.NewDecoder(responseRecorder.Body).Decode(&response)
+		err = json.NewDecoder(responseRecorder.Body).Decode(&response)
 		require.NoError(t, err)
 
 		// Assert
-		fmt.Println(response)
+
 		assert.Equal(t, http.StatusOK, responseRecorder.Code)
 		assert.Equal(t, 1, response.Id)
 	})
 
 	t.Run("TestShouldNotReturnMovieByIdWhenIsIdIsIncorrect", func(t *testing.T) {
 
-		responseRecorder := getResponse(t, movieHandler.GetMovieDetails, "/netflix/api/movies/:id", "/netflix/api/movies/11")
+		request, err := http.NewRequest(http.MethodGet, "/netflix/api/movies/11", nil)
+		require.NoError(t, err)
+		responseRecorder := httptest.NewRecorder()
+		engine.ServeHTTP(responseRecorder, request)
 		// Assert
 		assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
 	})
@@ -66,7 +85,10 @@ func TestAllEndpoints(t *testing.T) {
 			fmt.Println("Error encoding JSON:", err)
 			return
 		}
-		responseRecorder := postResponse(t, movieHandler.AddToCart, "/netflix/api/movies/add_to_cart", "/netflix/api/movies/add_to_cart", jsonData)
+		request, err := http.NewRequest(http.MethodPost, "/netflix/api/movies/add_to_cart", bytes.NewBuffer(jsonData))
+		require.NoError(t, err)
+		responseRecorder := httptest.NewRecorder()
+		engine.ServeHTTP(responseRecorder, request)
 		// Assert
 		assert.Equal(t, http.StatusCreated, responseRecorder.Code)
 	})
@@ -79,30 +101,12 @@ func TestAllEndpoints(t *testing.T) {
 			fmt.Println("Error encoding JSON:", err)
 			return
 		}
-		responseRecorder := postResponse(t, movieHandler.AddToCart, "/netflix/api/movies/add_to_cart", "/netflix/api/movies/add_to_cart", jsonData)
+		request, err := http.NewRequest(http.MethodPost, "/netflix/api/movies/add_to_cart", bytes.NewBuffer(jsonData))
+		require.NoError(t, err)
+		responseRecorder := httptest.NewRecorder()
+		engine.ServeHTTP(responseRecorder, request)
 		// Assert
 		assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
 	})
-}
 
-func getResponse(t *testing.T, handlerFunc gin.HandlerFunc, handlerUrl, url string) *httptest.ResponseRecorder {
-
-	engine := gin.Default()
-	engine.GET(handlerUrl, handlerFunc)
-	request, err := http.NewRequest(http.MethodGet, url, nil)
-	require.NoError(t, err)
-	responseRecorder := httptest.NewRecorder()
-	engine.ServeHTTP(responseRecorder, request)
-	return responseRecorder
-}
-
-func postResponse(t *testing.T, handlerFunc gin.HandlerFunc, handlerUrl, url string, body []byte) *httptest.ResponseRecorder {
-
-	engine := gin.Default()
-	engine.POST(handlerUrl, handlerFunc)
-	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
-	require.NoError(t, err)
-	responseRecorder := httptest.NewRecorder()
-	engine.ServeHTTP(responseRecorder, request)
-	return responseRecorder
 }

@@ -3,11 +3,12 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"github.com/golang-migrate/migrate"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 	"log"
 	"netflixRental/configs"
-	"os"
 )
 
 func CreateConnection(cfg configs.Config) *sql.DB {
@@ -31,17 +32,15 @@ func CreateConnection(cfg configs.Config) *sql.DB {
 	return dbConn
 }
 
-func RunMigration(cfg configs.Config) {
+func RunMigration(db *sql.DB) {
 	// Initialize migration instance
-	source, _ := os.Getwd()
-	path := fmt.Sprintf("%s/database/migration", source)
-	fmt.Println(path)
-	m, err := migrate.New(
+	path := fmt.Sprintf("file:///%s/database/migration", configs.SourceCodeRootDirectory)
+
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	m, err := migrate.NewWithDatabaseInstance(
 		path,
-		"postgres://root:pass@localhost:5432/netflix-rental?sslmode=disable",
-	)
+		"postgres", driver)
 	if err != nil {
-		fmt.Println(os.Getwd())
 		log.Fatalf("Error initializing migration: %v", err)
 	}
 
@@ -52,5 +51,3 @@ func RunMigration(cfg configs.Config) {
 
 	log.Println("Migrations applied successfully")
 }
-
-//$ migrate -path database/migration/ -database "postgresql://username:secretkey@localhost:5432/database_name?sslmode=disable" -verbose up
