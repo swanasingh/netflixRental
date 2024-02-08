@@ -13,10 +13,31 @@ type MovieRepository interface {
 	Get(criteria movie.Criteria) []movie.Movie
 	GetMovieDetails(id int) (movie.Movie, error)
 	SaveCartData(cartItem movie.CartItem) error
+	ViewCart(user_id int) []movie.Movie
 }
 
 type movieRepo struct {
 	*sql.DB
+}
+
+func (m movieRepo) ViewCart(user_id int) []movie.Movie {
+	var cartItems []movie.Movie
+	rows, err := m.DB.Query("select m.id,title,year,released from movies m "+
+		"inner join cart c on m.id = c.movie_id where c.user_id=$1", user_id)
+
+	if err != nil {
+		log.Fatal("Could Not Fetch data From DB")
+	}
+	fmt.Println(rows)
+	for rows.Next() {
+		var movie movie.Movie
+		if err = rows.Scan(&movie.Id, &movie.Title,
+			&movie.Year, &movie.Released); err != nil {
+			log.Fatal("Could Not Fetch data From DB")
+		}
+		cartItems = append(cartItems, movie)
+	}
+	return cartItems
 }
 
 func (m movieRepo) SaveCartData(cartItem movie.CartItem) error {

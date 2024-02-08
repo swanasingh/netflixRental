@@ -9,6 +9,7 @@ type MovieService interface {
 	Get(criteria movie.Criteria) []movie.Movie
 	GetMovieDetails(id int) (movie.Movie, error)
 	AddToCart(cartItem movie.CartItem) error
+	ViewCart(user_id int) []movie.Movie
 }
 
 func NewMovieService(movieRespository movie_repo.MovieRepository) MovieService {
@@ -17,6 +18,10 @@ func NewMovieService(movieRespository movie_repo.MovieRepository) MovieService {
 
 type movieService struct {
 	movieRepo movie_repo.MovieRepository
+}
+
+func (m movieService) ViewCart(user_id int) []movie.Movie {
+	return m.movieRepo.ViewCart(user_id)
 }
 
 func (m movieService) AddToCart(cartItem movie.CartItem) error {

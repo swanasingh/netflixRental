@@ -162,6 +162,63 @@ func TestShouldNotAddToCartWhenCartItemIsInValid(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
 }
 
+func TestShouldReturnCartItemsWhenValidUserIdIsGiven(t *testing.T) {
+	mockResponse := []movie2.Movie{{
+		Title:  "Barbie",
+		Year:   "2023",
+		ImdbId: "tt1517268",
+	}, {
+		Title:  "Barbie as The Princess and the Pauper",
+		Year:   "2023",
+		ImdbId: "tt0426955",
+	},
+	}
+
+	movieService := mocks.MovieService{}
+	cartRequest := movie2.CartRequest{UserId: 2}
+
+	jsonData, err := json.Marshal(cartRequest)
+	if err != nil {
+		fmt.Println("Error encoding JSON:", err)
+		return
+	}
+	movieService.On("ViewCart", cartRequest.UserId).Return(mockResponse)
+	handler := NewMovieHandler(&movieService)
+	responseRecorder := getResponse(t, handler.ViewCart, "/netflix/api/movies/cart", "/netflix/api/movies/cart", jsonData)
+
+	var response []movie2.Movie
+
+	err = json.NewDecoder(responseRecorder.Body).Decode(&response)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, responseRecorder.Code)
+	assert.Equal(t, mockResponse, response)
+}
+
+func TestShouldReturnEmptyCartMessageWhenInvalidUserIdIsGiven(t *testing.T) {
+	var mockResponse []movie2.Movie
+
+	movieService := mocks.MovieService{}
+	cartRequest := movie2.CartRequest{UserId: 12}
+
+	jsonData, err := json.Marshal(cartRequest)
+	if err != nil {
+		fmt.Println("Error encoding JSON:", err)
+		return
+	}
+	movieService.On("ViewCart", cartRequest.UserId).Return(mockResponse)
+	handler := NewMovieHandler(&movieService)
+	responseRecorder := getResponse(t, handler.ViewCart, "/netflix/api/movies/cart", "/netflix/api/movies/cart", jsonData)
+
+	var response string
+
+	err = json.NewDecoder(responseRecorder.Body).Decode(&response)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, responseRecorder.Code)
+	assert.Equal(t, response, "Cart is empty")
+}
+
 func getResponse(t *testing.T, handlerFunc gin.HandlerFunc, handlerUrl, url string, body []byte) *httptest.ResponseRecorder {
 	engine := gin.Default()
 	engine.GET(handlerUrl, handlerFunc)

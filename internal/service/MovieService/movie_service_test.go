@@ -113,4 +113,27 @@ func TestMovieService(t *testing.T) {
 
 	})
 
+	t.Run("should return cartItems for valid user", func(t *testing.T) {
+
+		var mockResponse []movie.Movie
+		mockResponse = append(mockResponse, m1)
+		mockRepository := mocks.MovieRepository{}
+		mockRepository.On("ViewCart", 1).Return(mockResponse)
+		movieService := NewMovieService(&mockRepository)
+		response := movieService.ViewCart(1)
+		assert.Equal(t, mockResponse, response)
+
+	})
+
+	t.Run("should return empty cart for invalid user", func(t *testing.T) {
+
+		var mockResponse []movie.Movie
+		mockRepository := mocks.MovieRepository{}
+		mockRepository.On("ViewCart", 5).Return(mockResponse)
+		movieService := NewMovieService(&mockRepository)
+		response := movieService.ViewCart(5)
+		assert.Equal(t, mockResponse, response)
+
+	})
+
 }

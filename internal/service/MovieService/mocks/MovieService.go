@@ -16,6 +16,7 @@ type MovieService struct {
 // AddToCart provides a mock function with given fields: cartItem
 func (_m *MovieService) AddToCart(cartItem movie.CartItem) error {
 	ret := _m.Called(cartItem)
+
 	if len(ret) == 0 {
 		panic("no return value specified for AddToCart")
 	}
@@ -76,6 +77,26 @@ func (_m *MovieService) GetMovieDetails(id int) (movie.Movie, error) {
 	}
 
 	return r0, r1
+}
+
+// ViewCart provides a mock function with given fields: user_id
+func (_m *MovieService) ViewCart(user_id int) []movie.Movie {
+	ret := _m.Called(user_id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ViewCart")
+	}
+
+	var r0 []movie.Movie
+	if rf, ok := ret.Get(0).(func(int) []movie.Movie); ok {
+		r0 = rf(user_id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]movie.Movie)
+		}
+	}
+
+	return r0
 }
 
 // NewMovieService creates a new instance of MovieService. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

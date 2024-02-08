@@ -79,6 +79,26 @@ func (_m *MovieRepository) SaveCartData(cartItem movie.CartItem) error {
 	return r0
 }
 
+// ViewCart provides a mock function with given fields: user_id
+func (_m *MovieRepository) ViewCart(user_id int) []movie.Movie {
+	ret := _m.Called(user_id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ViewCart")
+	}
+
+	var r0 []movie.Movie
+	if rf, ok := ret.Get(0).(func(int) []movie.Movie); ok {
+		r0 = rf(user_id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]movie.Movie)
+		}
+	}
+
+	return r0
+}
+
 // NewMovieRepository creates a new instance of MovieRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMovieRepository(t interface {

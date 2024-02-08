@@ -13,15 +13,35 @@ type MovieHandler interface {
 	ListMovies(ctx *gin.Context)
 	GetMovieDetails(ctx *gin.Context)
 	AddToCart(ctx *gin.Context)
+	ViewCart(ctc *gin.Context)
 }
 
 type movie struct {
 	movieService MovieService.MovieService
 }
 
+func (m movie) ViewCart(ctx *gin.Context) {
+	var userInfo movie2.CartRequest
+	if err := ctx.ShouldBindJSON(&userInfo); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if userInfo.UserId == 0 {
+		ctx.JSON(http.StatusBadRequest, "Provide valid user_id")
+		return
+	}
+	cartItems := m.movieService.ViewCart(userInfo.UserId)
+	if cartItems != nil {
+		fmt.Println(cartItems)
+		ctx.JSON(http.StatusOK, cartItems)
+	} else {
+		ctx.JSON(http.StatusOK, "Cart is empty")
+	}
+
+}
+
 func (m movie) AddToCart(ctx *gin.Context) {
 	var cartData movie2.CartRequest
-	fmt.Println("I FOUND THE API")
 	if err := ctx.ShouldBindJSON(&cartData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

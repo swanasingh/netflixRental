@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS Cart
     user_id int,
     status bool,
     movie_id int,
-    FOREIGN KEY (movie_id) references Movies(id)
+    FOREIGN KEY (movie_id) references Movies(id),
+    FOREIGN KEY (user_id) references Users(id)
 )
