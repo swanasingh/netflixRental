@@ -26,6 +26,7 @@ type Movie struct {
 	Production string  `json:"production"`
 	Website    string  `json:"website"`
 	Response   bool    `json:"response"`
+	Price      float32 `json:"price"`
 }
 
 type MovieResponse struct {

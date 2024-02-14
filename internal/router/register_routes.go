@@ -23,6 +23,7 @@ func RegisterRoutes(engine *gin.Engine, db *sql.DB) {
 		group.GET("/movies/:id", movieHandler.GetMovieDetails)
 		group.POST("/movies/add_to_cart", movieHandler.AddToCart)
 		group.GET("/movies/cart", movieHandler.ViewCart)
+		group.POST("/movies/order", movieHandler.CreateOrder)
 	}
 
 }

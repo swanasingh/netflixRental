@@ -14,16 +14,46 @@ type MovieRepository interface {
 	GetMovieDetails(id int) (movie.Movie, error)
 	SaveCartData(cartItem movie.CartItem) error
 	ViewCart(user_id int) []movie.Movie
+	CreateOrder(order movie.OrderPayload) error
 }
 
 type movieRepo struct {
 	*sql.DB
 }
 
-func (m movieRepo) ViewCart(user_id int) []movie.Movie {
+func (m movieRepo) CreateOrder(order movie.OrderPayload) error {
+	/*Result, err := m.DB.Exec("insert into orders (user_id,total_amount,status) values($1, $2, $3)", order.UserId, order.TotalAmount, order.Status)
+	if err != nil {
+		return errors.New("error in creating order")
+	}*/
+
+	stmt, err := m.DB.Prepare("INSERT INTO orders (user_id,total_amount,status) values($1, $2, $3) RETURNING id")
+	if err != nil {
+		panic(err)
+	}
+
+	var orderId int
+	err = stmt.QueryRow(order.UserId, order.TotalAmount, order.Status).Scan(&orderId)
+	if err != nil {
+		return errors.New("error in creating order")
+	}
+
+	for _, mv := range order.Items {
+
+		fmt.Println(mv)
+		_, err = m.DB.Exec("insert into order_products (order_id,movie_id,quantity,price) values($1, $2, $3,$4)", orderId, mv.MovieId, mv.Quantity, mv.Price)
+		if err != nil {
+			return errors.New("error in saving order_products")
+		}
+	}
+
+	return nil
+}
+
+func (m movieRepo) ViewCart(userId int) []movie.Movie {
 	var cartItems []movie.Movie
-	rows, err := m.DB.Query("select m.id,title,year,released from movies m "+
-		"inner join cart c on m.id = c.movie_id where c.user_id=$1", user_id)
+	rows, err := m.DB.Query("select m.id,title,year,price from movies m "+
+		"inner join cart c on m.id = c.movie_id where c.user_id=$1", userId)
 
 	if err != nil {
 		log.Fatal("Could Not Fetch data From DB")
@@ -32,7 +62,7 @@ func (m movieRepo) ViewCart(user_id int) []movie.Movie {
 	for rows.Next() {
 		var movie movie.Movie
 		if err = rows.Scan(&movie.Id, &movie.Title,
-			&movie.Year, &movie.Released); err != nil {
+			&movie.Year, &movie.Price); err != nil {
 			log.Fatal("Could Not Fetch data From DB")
 		}
 		cartItems = append(cartItems, movie)
@@ -42,9 +72,9 @@ func (m movieRepo) ViewCart(user_id int) []movie.Movie {
 
 func (m movieRepo) SaveCartData(cartItem movie.CartItem) error {
 
-	_, err := m.DB.Exec("insert into cart (user_id,status,movie_id) values($1, $2, $3)", cartItem.UserId, true, cartItem.MovieId)
+	_, err := m.DB.Exec("insert into cart (user_id,quantity,movie_id) values($1, $2, $3)", cartItem.UserId, cartItem.Quantity, cartItem.MovieId)
 	if err != nil {
-		return errors.New("Movie is not present in database")
+		return errors.New("movie is not present in database")
 	}
 
 	return nil
@@ -61,7 +91,7 @@ func (m movieRepo) GetMovieDetails(id int) (movie.Movie, error) {
 		&mv.Writer, &mv.Actors, &mv.Plot, &mv.Language,
 		&mv.Country, &mv.Awards, &mv.Poster, &mv.Metascore,
 		&mv.ImdbRating, &mv.ImdbVotes, &mv.ImdbId, &mv.Type, &mv.Dvd, &mv.BoxOffice,
-		&mv.Production, &mv.Website, &mv.Response)
+		&mv.Production, &mv.Website, &mv.Response, &mv.Price)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -103,7 +133,7 @@ func (m movieRepo) Get(criteria movie.Criteria) []movie.Movie {
 			&movie.Writer, &movie.Actors, &movie.Plot, &movie.Language,
 			&movie.Country, &movie.Awards, &movie.Poster, &movie.Metascore,
 			&movie.ImdbRating, &movie.ImdbVotes, &movie.ImdbId, &movie.Type, &movie.Dvd, &movie.BoxOffice,
-			&movie.Production, &movie.Website, &movie.Response); err != nil {
+			&movie.Production, &movie.Website, &movie.Response, &movie.Price); err != nil {
 			movieList.Movies = append(movieList.Movies, movie)
 		}
 

@@ -13,11 +13,27 @@ type MovieHandler interface {
 	ListMovies(ctx *gin.Context)
 	GetMovieDetails(ctx *gin.Context)
 	AddToCart(ctx *gin.Context)
-	ViewCart(ctc *gin.Context)
+	ViewCart(ctx *gin.Context)
+	CreateOrder(ctx *gin.Context)
 }
 
 type movie struct {
 	movieService MovieService.MovieService
+}
+
+func (m movie) CreateOrder(ctx *gin.Context) {
+
+	var order movie2.OrderPayload
+	if err := ctx.ShouldBindJSON(&order); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := m.movieService.CreateOrder(order); err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
+		return
+	} else {
+		ctx.JSON(http.StatusCreated, order)
+	}
 }
 
 func (m movie) ViewCart(ctx *gin.Context) {
@@ -50,7 +66,7 @@ func (m movie) AddToCart(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, "Provide valid movie_id")
 		return
 	}
-	cartItem := movie2.CartItem{MovieId: cartData.MovieId, UserId: cartData.UserId, Status: true}
+	cartItem := movie2.CartItem{MovieId: cartData.MovieId, UserId: cartData.UserId, Status: true, Quantity: cartData.Quantity}
 	if err := m.movieService.AddToCart(cartItem); err != nil {
 		ctx.JSON(http.StatusBadRequest, "This Movie Is Not Available")
 		return

@@ -23,5 +23,6 @@ CREATE TABLE IF NOT EXISTS Movies (
     box_office VARCHAR(20),
     production VARCHAR(255),
     website VARCHAR(255),
-    response BOOLEAN NOT NULL
+    response BOOLEAN NOT NULL,
+    price NUMERIC(10, 2)
     );
