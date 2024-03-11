@@ -2,10 +2,11 @@ package MovieService
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"netflixRental/internal/models/movie"
 	"netflixRental/internal/repository/movie_repo/mocks"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMovieService(t *testing.T) {
@@ -36,6 +37,7 @@ func TestMovieService(t *testing.T) {
 		"",
 		"",
 		false,
+		10,
 	}
 
 	t.Run("validate count of Movies", func(t *testing.T) {

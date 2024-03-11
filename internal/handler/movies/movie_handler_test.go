@@ -5,14 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	movie2 "netflixRental/internal/models/movie"
+	"netflixRental/internal/service/EmailService"
 	"netflixRental/internal/service/MovieService/mocks"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestShouldReturnListOfMovieWithMock(t *testing.T) {
@@ -44,6 +46,7 @@ func TestShouldReturnListOfMovieWithMock(t *testing.T) {
 		"",
 		"",
 		false,
+		10,
 	},
 	}
 	movieService.On(
@@ -51,7 +54,8 @@ func TestShouldReturnListOfMovieWithMock(t *testing.T) {
 		movie2.Criteria{},
 	).Return(mockResponse)
 
-	handler := NewMovieHandler(&movieService)
+	emailService := EmailService.NewEmailService()
+	handler := NewMovieHandler(&movieService, emailService)
 	responseRecorder := getResponse(t, handler.ListMovies, "/netflix/api/movies", "/netflix/api/movies", nil)
 	var response []movie2.Movie
 	err := json.NewDecoder(responseRecorder.Body).Decode(&response)
@@ -82,7 +86,8 @@ func TestShouldReturnListOfMoviesFilteredByCriteria(t *testing.T) {
 
 	criteria := movie2.Criteria{Actors: "Kelly Sheridan", Genre: "Animation", Year: 2023}
 	movieService.On("Get", criteria).Return(mockResponse, nil)
-	handler := NewMovieHandler(&movieService)
+	emailService := EmailService.NewEmailService()
+	handler := NewMovieHandler(&movieService, emailService)
 	responseRecorder := getResponse(t, handler.ListMovies, "/netflix/api/movies", "/netflix/api/movies?actor=Kelly Sheridan&genre=Animation&year=2023", nil)
 	var response []movie2.Movie
 
@@ -106,7 +111,8 @@ func TestShouldReturnMovieDetailsWhenCorrectIdGiven(t *testing.T) {
 		Poster: "https://m.media-amazon.com/images/M/MV5BNjU3N2QxNzYtMjk1NC00MTc4LTk1NTQtMmUxNTljM2I0NDA5XkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg",
 	}
 	movieService.On("GetMovieDetails", 5).Return(mockResponse, nil)
-	handler := NewMovieHandler(&movieService)
+	emailService := EmailService.NewEmailService()
+	handler := NewMovieHandler(&movieService, emailService)
 	responseRecorder := getResponse(t, handler.GetMovieDetails, "/netflix/api/movies/:id", "/netflix/api/movies/5", nil)
 	var response movie2.Movie
 	err := json.NewDecoder(responseRecorder.Body).Decode(&response)
@@ -121,7 +127,8 @@ func TestShouldReturnEmptyMovieDetailsWhenIncorrectIdGiven(t *testing.T) {
 	movieService := mocks.MovieService{}
 
 	movieService.On("GetMovieDetails", 9).Return(movie2.Movie{}, errors.New("Invalid Id"))
-	handler := NewMovieHandler(&movieService)
+	emailService := EmailService.NewEmailService()
+	handler := NewMovieHandler(&movieService, emailService)
 	responseRecorder := getResponse(t, handler.GetMovieDetails, "/netflix/api/movies/:id", "/netflix/api/movies/9", nil)
 
 	assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
@@ -138,7 +145,8 @@ func TestShouldAddToCartWhenCartItemIsValid(t *testing.T) {
 	}
 
 	movieService.On("AddToCart", cartItem).Return(nil)
-	handler := NewMovieHandler(&movieService)
+	emailService := EmailService.NewEmailService()
+	handler := NewMovieHandler(&movieService, emailService)
 	responseRecorder := postResponse(t, handler.AddToCart, "/netflix/api/movies/add_to_cart", "/netflix/api/movies/add_to_cart", jsonData)
 
 	assert.Equal(t, http.StatusCreated, responseRecorder.Code)
@@ -156,7 +164,8 @@ func TestShouldNotAddToCartWhenCartItemIsInValid(t *testing.T) {
 	}
 
 	movieService.On("AddToCart", cartItem).Return(expectedError)
-	handler := NewMovieHandler(&movieService)
+	emailService := EmailService.NewEmailService()
+	handler := NewMovieHandler(&movieService, emailService)
 	responseRecorder := postResponse(t, handler.AddToCart, "/netflix/api/movies/add_to_cart", "/netflix/api/movies/add_to_cart", jsonData)
 
 	assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
@@ -183,7 +192,8 @@ func TestShouldReturnCartItemsWhenValidUserIdIsGiven(t *testing.T) {
 		return
 	}
 	movieService.On("ViewCart", cartRequest.UserId).Return(mockResponse)
-	handler := NewMovieHandler(&movieService)
+	emailService := EmailService.NewEmailService()
+	handler := NewMovieHandler(&movieService, emailService)
 	responseRecorder := getResponse(t, handler.ViewCart, "/netflix/api/movies/cart", "/netflix/api/movies/cart", jsonData)
 
 	var response []movie2.Movie
@@ -207,7 +217,8 @@ func TestShouldReturnEmptyCartMessageWhenInvalidUserIdIsGiven(t *testing.T) {
 		return
 	}
 	movieService.On("ViewCart", cartRequest.UserId).Return(mockResponse)
-	handler := NewMovieHandler(&movieService)
+	emailService := EmailService.NewEmailService()
+	handler := NewMovieHandler(&movieService, emailService)
 	responseRecorder := getResponse(t, handler.ViewCart, "/netflix/api/movies/cart", "/netflix/api/movies/cart", jsonData)
 
 	var response string
