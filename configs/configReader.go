@@ -13,6 +13,7 @@ var SourceCodeRootDirectory, _ = GetRootDirectory()
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
+	Email    EmailConfig
 }
 
 type ServerConfig struct {
@@ -27,6 +28,13 @@ type DatabaseConfig struct {
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
 	Database string `yaml:"database"`
+}
+
+type EmailConfig struct {
+	Host      string `yaml:"host"`
+	Port      string `yaml:"port"`
+	FromEmail string `yaml:"from"`
+	Password  string `yaml:"password"`
 }
 
 func GetConfigs(cfg *Config) {

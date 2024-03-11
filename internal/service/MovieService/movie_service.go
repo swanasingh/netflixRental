@@ -1,6 +1,7 @@
 package MovieService
 
 import (
+	"errors"
 	"netflixRental/internal/models/movie"
 	"netflixRental/internal/repository/movie_repo"
 )
@@ -11,14 +12,26 @@ type MovieService interface {
 	AddToCart(cartItem movie.CartItem) error
 	ViewCart(user_id int) []movie.Movie
 	CreateOrder(order movie.OrderPayload) error
+	GetInvoice(orderId int) ([]movie.Invoice, movie.User, error)
 }
 
-func NewMovieService(movieRespository movie_repo.MovieRepository) MovieService {
-	return &movieService{movieRespository}
+func NewMovieService(movieRepository movie_repo.MovieRepository) MovieService {
+	return &movieService{movieRepository}
 }
 
 type movieService struct {
 	movieRepo movie_repo.MovieRepository
+}
+
+func (m movieService) GetInvoice(orderId int) ([]movie.Invoice, movie.User, error) {
+	invoices, user, err := m.movieRepo.GetInvoice(orderId)
+	if (err != nil) || user == (movie.User{}) {
+		return nil, user, errors.New("provide valid input")
+	} else {
+		return invoices, user, nil
+	}
+
+	return m.movieRepo.GetInvoice(orderId)
 }
 
 func (m movieService) CreateOrder(order movie.OrderPayload) error {

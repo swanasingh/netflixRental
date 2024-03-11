@@ -6,15 +6,17 @@ import (
 	"netflixRental/internal/handler/helloworld"
 	"netflixRental/internal/handler/movies"
 	"netflixRental/internal/repository/movie_repo"
+	"netflixRental/internal/service/EmailService"
 	"netflixRental/internal/service/MovieService"
 )
 
 func RegisterRoutes(engine *gin.Engine, db *sql.DB) {
 
 	movieRepository := movie_repo.NewMovieRepository(db)
+	emailService := EmailService.NewEmailService()
 	movieService := MovieService.NewMovieService(movieRepository)
 	var movieHandler movies.MovieHandler
-	movieHandler = movies.NewMovieHandler(movieService)
+	movieHandler = movies.NewMovieHandler(movieService, emailService)
 
 	group := engine.Group("/netflix/api")
 	{
@@ -24,6 +26,7 @@ func RegisterRoutes(engine *gin.Engine, db *sql.DB) {
 		group.POST("/movies/add_to_cart", movieHandler.AddToCart)
 		group.GET("/movies/cart", movieHandler.ViewCart)
 		group.POST("/movies/order", movieHandler.CreateOrder)
+		group.POST("/movies/invoice", movieHandler.SendInvoice)
 	}
 
 }

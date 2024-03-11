@@ -2,11 +2,14 @@ package movies
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+	"netflixRental/internal/helpers"
 	movie2 "netflixRental/internal/models/movie"
+	"netflixRental/internal/service/EmailService"
 	"netflixRental/internal/service/MovieService"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type MovieHandler interface {
@@ -15,10 +18,34 @@ type MovieHandler interface {
 	AddToCart(ctx *gin.Context)
 	ViewCart(ctx *gin.Context)
 	CreateOrder(ctx *gin.Context)
+	SendInvoice(ctx *gin.Context)
 }
 
 type movie struct {
 	movieService MovieService.MovieService
+	emailService EmailService.EmailService
+}
+
+func (m movie) SendInvoice(ctx *gin.Context) {
+
+	var order struct {
+		OrderId int `json:"order_id"`
+	}
+	if err := ctx.BindJSON(&order); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if invoices, user, err := m.movieService.GetInvoice(order.OrderId); err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
+		return
+	} else {
+		resp := movie2.Invoices{user, invoices}
+		ctx.JSON(http.StatusOK, resp)
+		emailBody := helpers.GenerateInvoiceEmailBody(resp)
+		m.emailService.SendInvoice(user.Email, emailBody)
+
+	}
 }
 
 func (m movie) CreateOrder(ctx *gin.Context) {
@@ -104,6 +131,6 @@ func (m movie) ListMovies(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, response)
 }
 
-func NewMovieHandler(movieService MovieService.MovieService) MovieHandler {
-	return &movie{movieService: movieService}
+func NewMovieHandler(movieService MovieService.MovieService, emailService EmailService.EmailService) MovieHandler {
+	return &movie{movieService: movieService, emailService: emailService}
 }

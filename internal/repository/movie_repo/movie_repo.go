@@ -15,10 +15,56 @@ type MovieRepository interface {
 	SaveCartData(cartItem movie.CartItem) error
 	ViewCart(user_id int) []movie.Movie
 	CreateOrder(order movie.OrderPayload) error
+	GetInvoice(orderId int) ([]movie.Invoice, movie.User, error)
+	GetUserDetails(userId int) (movie.User, error)
 }
 
 type movieRepo struct {
 	*sql.DB
+}
+
+func (m movieRepo) GetUserDetails(userId int) (movie.User, error) {
+	var user movie.User
+	row := m.DB.QueryRow("SELECT id,name,email,address from users where id=$1", userId)
+
+	err := row.Scan(&user.UserId, &user.Name, &user.Email, &user.Address)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return user, errors.New("Invalid Id")
+		}
+	}
+	return user, nil
+}
+
+func (m movieRepo) GetInvoice(orderId int) ([]movie.Invoice, movie.User, error) {
+
+	var invoices []movie.Invoice
+	var user movie.User
+	rows, err := m.DB.Query("SELECT i.id,op.order_id,m.title,op.quantity,op.price,o.created_at,u.id "+
+		"FROM invoices i inner join order_products op on i.order_id=op.order_id "+
+		"inner join orders o on o.id =i.order_id "+
+		"inner join movies m on m.id=op.movie_id "+
+		"inner join users u on u.id =o.user_id "+
+		"where i.order_id =$1", orderId)
+	if err != nil {
+		fmt.Println(err.Error())
+		log.Fatal("Could Not Fetch data From DB")
+	}
+
+	var userId int
+	for rows.Next() {
+		var inv movie.Invoice
+		if err = rows.Scan(&inv.InvoiceId, &inv.OrderId, &inv.MovieName, &inv.Quantity, &inv.Price, &inv.InvoiceDate, &userId); err != nil {
+			return nil, user, err
+		}
+		invoices = append(invoices, inv)
+	}
+	if userId != 0 {
+		user, _ = m.GetUserDetails(userId)
+	}
+
+	return invoices, user, nil
 }
 
 func (m movieRepo) CreateOrder(order movie.OrderPayload) error {
@@ -29,7 +75,7 @@ func (m movieRepo) CreateOrder(order movie.OrderPayload) error {
 
 	stmt, err := m.DB.Prepare("INSERT INTO orders (user_id,total_amount,status) values($1, $2, $3) RETURNING id")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	var orderId int
@@ -39,12 +85,14 @@ func (m movieRepo) CreateOrder(order movie.OrderPayload) error {
 	}
 
 	for _, mv := range order.Items {
-
-		fmt.Println(mv)
 		_, err = m.DB.Exec("insert into order_products (order_id,movie_id,quantity,price) values($1, $2, $3,$4)", orderId, mv.MovieId, mv.Quantity, mv.Price)
 		if err != nil {
 			return errors.New("error in saving order_products")
 		}
+	}
+	_, err = m.DB.Exec("INSERT INTO invoices (order_id) values($1)", orderId)
+	if err != nil {
+		return err
 	}
 
 	return nil
